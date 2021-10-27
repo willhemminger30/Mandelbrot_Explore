@@ -41,7 +41,7 @@ Any lower and the image resolution will be compromised.
   
 ## Known Bugs:
 - If you click a new centerpoint while the graph is being plotted, the preview window will display the partially rendered graph.
-(This does not affect the final image nor cause any other issues, but it does look cool.  I have not decided yet if this is 
+(This does not affect the final image, nor cause any other issues, but it does look cool.  I have not decided yet if this is 
 in fact a bug, or a feature).
 
 ## Issues for Future Development
