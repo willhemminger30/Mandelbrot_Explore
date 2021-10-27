@@ -26,11 +26,11 @@ With the three buttons, you can plot a new image with the updated parameters, re
 and save the current image.  You should not try to save the image without plotting it first after modifying
 the parameters, unless you are looking at the default image or have just reset.  
 
-This is still an ongoing project.  There will be bugs.  
+**This is still an ongoing project.  There will be bugs.**  
 I do not recommend setting the scale value so low that it goes beyond fifteen decimal places.  
 Any lower and the image resolution will be compromised.
 
-Why does it take so much time to save the image after plotting?
+## Why does it take so much time to save the image after plotting?
 - This is because when you plot the image, you are plotting it on a preview screen.
   By default, this image is set to 1921 by 1081 resolution.  When you select a width and height
   for your image, this value will NOT be used until you have pressed Save, at which point the 
