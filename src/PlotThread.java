@@ -21,6 +21,7 @@ public class PlotThread implements Runnable {
     private final int iterations;
     private final SyncCounter counter;
 
+    // constructor for thread that takes in calculation parameters
     public PlotThread(int iterations, int startRow, int stopRow, double zoomScale, double offsetX, double offsetY,
                       int width, BufferedImage image, SyncCounter counter)
     {
@@ -35,7 +36,7 @@ public class PlotThread implements Runnable {
         this.counter = counter;
     }
 
-
+    // this function runs when the thread is started, works to assign color values to plot based on equation result
     public void run()
     {
         //System.out.println("Start: " + startRow + " Stop: " + stopRow);
@@ -59,6 +60,7 @@ public class PlotThread implements Runnable {
         }
     }
 
+    // iterate returns a color to run()
     public Color iterate(int iterations, int x, int y, double zoomScale, double offsetX, double offsetY)
     {
 
@@ -68,7 +70,6 @@ public class PlotThread implements Runnable {
         //offset
         r += offsetX;
         i += offsetY;
-
 
 
         Complex z = new Complex(0, 0);

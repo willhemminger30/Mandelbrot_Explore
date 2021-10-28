@@ -12,21 +12,24 @@ import java.io.File;
 
 public class MandelbrotPlot {
 
-    private BufferedImage plot;
+    private BufferedImage plot; // the image of the current Mandelbrot plot
     private JProgressBar bar;
 
+    // constructor that takes in progress bar object
     public MandelbrotPlot(JProgressBar bar)
     {
         this.plot = null;
         this.bar = bar;
     }
 
+    // constructor for initial width & height parameters
     public MandelbrotPlot(int width, int height, JProgressBar bar)
     {
         plot = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         this.bar = bar;
     }
 
+    // the meat of the program, uses multithreading to plot the Mandelbrot set
     public void plotImage(int width, int height, int iterations, double zoomScale, double offsetX, double offsetY)
     {
         plot = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -39,12 +42,12 @@ public class MandelbrotPlot {
         System.out.println("Number of processors detected: " + numCores);
         System.out.println("Generating " + numCores + " threads...");
 
+        // threads are initialized and responsible for different horizontal strips of the image
         for(int i = 0; i < numCores; i++)
         {
             plottingThreads[i] = new Thread(new PlotThread(iterations, (int)(((double) i / numCores) * plot.getHeight()),
                     (int)((((double)(i + 1)) / numCores) * plot.getHeight()) - 1, zoomScale, offsetX, offsetY,
                     plot.getWidth(), plot, counter), "Thread " + (i + 1));
-
         }
 
         System.out.println("Starting Threads");

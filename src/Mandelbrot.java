@@ -1,6 +1,7 @@
 /**
  * Mandelbrot.java
  * A program to plot the Mandelbrot set using png images.
+ * This class contains the frame for the GUI
  * @author William Hemminger
  * 7 April 2021
  */
@@ -57,7 +58,7 @@ public class Mandelbrot extends JFrame {
     private static JButton resetButton;
     private static KeyListener changeListener;
 
-
+    // this is the default constructor for the GUI
     public Mandelbrot()
     {
         setTitle("Mandelbrot Plot");
@@ -99,6 +100,7 @@ public class Mandelbrot extends JFrame {
             public void keyReleased(KeyEvent e) {
                 try
                 {
+                    // if GUI fields do not match actual values, disable the save button
                     if(Integer.parseInt(widthField.getText()) != width || Integer.parseInt(heightField.getText()) != height
                             || Integer.parseInt(iterationField.getText()) != iterations || Double.parseDouble(scaleField.getText()) != scale
                             || Double.parseDouble(xOffsetField.getText()) != xOffset || Double.parseDouble(yOffsetField.getText())
@@ -106,7 +108,7 @@ public class Mandelbrot extends JFrame {
                     {
                         saveButton.setEnabled(false);
                     }
-                    else
+                    else // otherwise make sure that save is enabled
                     {
                         saveButton.setEnabled(true);
                     }
@@ -143,15 +145,15 @@ public class Mandelbrot extends JFrame {
         yOffsetField.setPreferredSize(new Dimension(150, 20));
 
 
-
         viewer.setPreferredSize(new Dimension(1921, 1081));
+
+        // create a new JPanel object to serve as the preview image viewer
         viewer = new JPanel() {
             @Override
-            public void paintComponent(Graphics g)
+            public void paintComponent(Graphics g) // paints the current Mandelbrot image
             {
                 int difference = 0;
                 super.paintComponent(g);
-
 
                 if(viewer.getWidth() <= viewer.getHeight() * (16.0 / 9))
                 {
@@ -166,7 +168,7 @@ public class Mandelbrot extends JFrame {
 
             }};
 
-
+        // mouse click serves to set new plot center point
         viewer.addMouseListener(new MouseInputListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -175,9 +177,8 @@ public class Mandelbrot extends JFrame {
                     @Override
                     public void run()
                     {
-
+                        // when clicked, draw a circle over existing image and repaint
                         int difference = 0;
-
 
                         int xClick = e.getX();
                         int yClick = e.getY();
@@ -221,7 +222,7 @@ public class Mandelbrot extends JFrame {
                     }
                 };
 
-
+                //drawing occurs in separate thread
                 Thread newThread = new Thread(runnable);
                 newThread.start();
             }
@@ -258,6 +259,7 @@ public class Mandelbrot extends JFrame {
             }
         });
 
+        // redraw plot according to current user parameters
         plotButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -275,6 +277,7 @@ public class Mandelbrot extends JFrame {
             }
         });
 
+        // save the image to .png at user's resolution of choice
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -283,6 +286,7 @@ public class Mandelbrot extends JFrame {
             }
         });
 
+        // reset the plot to the default position
         resetButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -360,8 +364,6 @@ public class Mandelbrot extends JFrame {
 
     public static void main(String[] args) {
 
-
-
         width = 3841;
         height = 2161;
         iterations = 1000;
@@ -371,19 +373,17 @@ public class Mandelbrot extends JFrame {
 
         new Mandelbrot();
 
+        // initialize full size plot
         mandelbrot = new MandelbrotPlot(3841, 2161, bar);
 
-
-
+        // initialize viewer plot
         viewerMandelbrot = new MandelbrotPlot(bar);
-
 
         Mandelbrot.plotImage();
 
-
-
     }
 
+    // function to save the user's current plot with a chosen filename
     public static void saveImage()
     {
 
@@ -427,6 +427,7 @@ public class Mandelbrot extends JFrame {
         }
     }
 
+    // function to plot with the current user parameters
     public static void plotImage()
     {
         Runnable r = new Runnable() {
@@ -464,7 +465,4 @@ public class Mandelbrot extends JFrame {
         t.start();
 
     }
-
-
-
 }

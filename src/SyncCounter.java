@@ -13,6 +13,7 @@ public class SyncCounter {
     private final int total;
     private JProgressBar bar;
 
+    // constructor that takes in total number of pixels and progress bar
     public SyncCounter(int total, JProgressBar bar)
     {
         this.counter = 0;
@@ -22,6 +23,7 @@ public class SyncCounter {
         //System.out.println(bar);
     }
 
+    // increments counter and adjusts progress bar
     public synchronized void increment()
     {
         //System.out.println(bar);
