@@ -4,7 +4,7 @@
 - This program also allows you to save images of the observed area of the Mandelbrot set at a resolution of your choosing.
 
 ## How do I use this?
-This program includes a .jar file under out/artifacts/MandelbrotWithGui_jar/.  To use this application, your system will require
+This program includes a .jar file under out/artifacts/MandelbrotWithGuiShading_jar/.  To use this application, your system will require
 Java with version 8 or newer. 
 
 To launch the application, double click the .jar file.  Feel free to resize the application
