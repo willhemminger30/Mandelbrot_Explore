@@ -52,6 +52,7 @@ primitive.  Currently, the system does not prohibit the user from doing this.
 ## Recent Updates:
   08/07/21:
   - Fixed bug where user could not plot image from manually-entered coordinates.
-
+  12/20/21:
+  - Added shading capabilities
 
 
