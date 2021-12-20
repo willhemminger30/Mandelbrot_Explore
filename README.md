@@ -19,6 +19,7 @@ These parameters include:
 - Scale (This scale value adjusts the zoom for the plot, smaller value = larger image)
 - Real-Offset (Left / Right offset for the image, also adjusted by clicking for new center point)
 - Imaginary Offset (Up / Down offset for the image, also adjusted by clicking for new center point)
+- Shading factor (determines the overall contrast of the image, smaller value makes the background darker)
 
 Alternatively, you can manually enter coordinates instead of clicking on a new center point.
 
