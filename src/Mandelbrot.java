@@ -7,14 +7,11 @@
  */
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.event.MouseInputListener;
-import javax.swing.text.Document;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.util.Scanner;
+import java.io.File;
 
 public class Mandelbrot extends JFrame {
     private static JPanel viewer;
@@ -26,6 +23,7 @@ public class Mandelbrot extends JFrame {
     private static double tempX;
     private static double tempY;
     private static int iterations;
+    private static double shadingFactor;
     private static MandelbrotPlot mandelbrot;
     private static MandelbrotPlot viewerMandelbrot;
     private static JPanel rightPanel;
@@ -46,23 +44,27 @@ public class Mandelbrot extends JFrame {
     private static JPanel scalePanel;
     private static JPanel xOffsetPanel;
     private static JPanel yOffsetPanel;
+    private static JPanel shadingPanel;
     private static JLabel widthLabel;
     private static JLabel heightLabel;
     private static JLabel iterationLabel;
     private static JLabel scaleLabel;
     private static JLabel xOffsetLabel;
     private static JLabel yOffsetLabel;
+    private static JLabel shadingLabel;
+    private static JLabel shadingField;
     private static JButton saveButton;
     private static BufferedImage backGroundImage;
     private static JProgressBar bar;
     private static JButton resetButton;
     private static KeyListener changeListener;
+    private static JSlider shadingSlider;
 
     // this is the default constructor for the GUI
     public Mandelbrot()
     {
         setTitle("Mandelbrot Plot");
-        setMinimumSize(new Dimension(800, 450));
+        setMinimumSize(new Dimension(1280, 720));
         setMaximumSize(new Dimension(1300,800));
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -84,6 +86,17 @@ public class Mandelbrot extends JFrame {
         yOffsetField = new JTextField("0");
         topFields = new JPanel(new BorderLayout());
         bottomFields = new JPanel(new BorderLayout());
+        shadingSlider = new JSlider(1, 1000, 500);
+        shadingSlider.setPreferredSize(new Dimension(300,0));
+        shadingLabel = new JLabel("SHADING FACTOR", SwingConstants.CENTER);
+        shadingLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        shadingLabel.setFont(new Font("Tahoma", Font.BOLD, 10));
+        shadingField = new JLabel("50.0", SwingConstants.CENTER);
+        shadingField.setOpaque(true);
+        shadingField.setBackground(Color.WHITE);
+        shadingField.setPreferredSize(new Dimension(70, 30));
+        shadingField.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
+        shadingField.setFont(new Font("Tahoma", Font.PLAIN, 15));
 
         changeListener = new KeyListener() {
             @Override
@@ -126,6 +139,7 @@ public class Mandelbrot extends JFrame {
         scalePanel = new JPanel(new BorderLayout());
         xOffsetPanel = new JPanel(new BorderLayout());
         yOffsetPanel = new JPanel(new BorderLayout());
+        shadingPanel = new JPanel(new BorderLayout(10, 10));
         bar = new JProgressBar();
         bar.setValue(0);
         bar.setStringPainted(true);
@@ -173,10 +187,10 @@ public class Mandelbrot extends JFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
 
-                Runnable runnable = new Runnable() {
+                //drawing occurs in separate thread
+                Thread newThread = new Thread(new Runnable() {
                     @Override
-                    public void run()
-                    {
+                    public void run() {
                         // when clicked, draw a circle over existing image and repaint
                         int difference = 0;
 
@@ -218,12 +232,8 @@ public class Mandelbrot extends JFrame {
                         yOffsetField.setText(Double.toString(tempY));
 
                         saveButton.setEnabled(false);
-
                     }
-                };
-
-                //drawing occurs in separate thread
-                Thread newThread = new Thread(runnable);
+                });
                 newThread.start();
             }
 
@@ -298,9 +308,12 @@ public class Mandelbrot extends JFrame {
                 tempX = 0;
                 yOffsetField.setText("0");
                 tempY = 0;
+                shadingField.setText("50.0");
 
                 width = Integer.parseInt(widthField.getText());
                 height = Integer.parseInt(heightField.getText());
+                shadingSlider.setValue(500);
+                shadingFactor = 50;
 
                 if((width != mandelbrot.getPlot().getWidth()) || (width != mandelbrot.getPlot().getHeight()))
                 {
@@ -319,16 +332,28 @@ public class Mandelbrot extends JFrame {
         xOffsetField.addKeyListener(changeListener);
         yOffsetField.addKeyListener(changeListener);
 
+        shadingSlider.addChangeListener(new javax.swing.event.ChangeListener(){
+            @Override
+            public void stateChanged(javax.swing.event.ChangeEvent evt)
+            {
+                shadingSliderStateChanged(evt);
+            }
+        });
 
         viewer.setVisible(true);
         add(viewer, BorderLayout.CENTER);
 
         add(rightPanel, BorderLayout.EAST);
+        add(shadingPanel, BorderLayout.SOUTH);
+        shadingPanel.add(shadingSlider, BorderLayout.CENTER);
+        shadingPanel.add(shadingField, BorderLayout.EAST);
+        shadingPanel.add(shadingLabel, BorderLayout.WEST);
 
         rightPanel.add(rightTop, BorderLayout.NORTH);
         rightPanel.add(rightBottom, BorderLayout.SOUTH);
 
-        rightBottom.add(bar, BorderLayout.NORTH);
+        //rightBottom.add(shadingPanel, BorderLayout.NORTH);
+        rightBottom.add(bar, BorderLayout.SOUTH);
         rightBottom.add(plotButton, BorderLayout.WEST);
         rightBottom.add(saveButton, BorderLayout.EAST);
         rightBottom.add(resetButton, BorderLayout.CENTER);
@@ -342,6 +367,7 @@ public class Mandelbrot extends JFrame {
         scalePanel.add(scaleField, BorderLayout.CENTER);
         xOffsetPanel.add(xOffsetField, BorderLayout.CENTER);
         yOffsetPanel.add(yOffsetField, BorderLayout.CENTER);
+
 
         widthPanel.add(widthLabel, BorderLayout.NORTH);
         heightPanel.add(heightLabel, BorderLayout.NORTH);
@@ -361,31 +387,18 @@ public class Mandelbrot extends JFrame {
         setVisible(true);
     }
 
-
-    public static void main(String[] args) {
-
-        width = 3841;
-        height = 2161;
-        iterations = 1000;
-        scale = 0.001;
-        xOffset = 0;
-        yOffset = 0;
-
-        new Mandelbrot();
-
-        // initialize full size plot
-        mandelbrot = new MandelbrotPlot(3841, 2161, bar);
-
-        // initialize viewer plot
-        viewerMandelbrot = new MandelbrotPlot(bar);
-
-        Mandelbrot.plotImage();
-
+    private void shadingSliderStateChanged(javax.swing.event.ChangeEvent evt)
+    {
+        JSlider source = (JSlider) evt.getSource();
+        shadingFactor = source.getValue() / 10.0;
+        shadingField.setText(Double.toString(shadingFactor));
     }
 
     // function to save the user's current plot with a chosen filename
-    public static void saveImage()
-    {
+    public static void saveImage() {
+        plotButton.setEnabled(false);
+        resetButton.setEnabled(false);
+        saveButton.setEnabled(false);
 
         width = Integer.parseInt(widthField.getText());
         height = Integer.parseInt(heightField.getText());
@@ -404,33 +417,46 @@ public class Mandelbrot extends JFrame {
 
         if(fileName != null)
         {
-            Runnable r = new Runnable() {
-                @Override
-                public void run() {
-                    plotButton.setEnabled(false);
-                    resetButton.setEnabled(false);
-                    saveButton.setEnabled(false);
+            String saveFileName = "Images/" + fileName;
+            File directory = new File("Images/");
 
-                    mandelbrot.plotImage(width, height, iterations, scale, xOffset, yOffset);
+            if(!directory.exists())
+            {
+                directory.mkdir();
+            }
+            else {
+                Thread t = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mandelbrot.plotImage(width, height, iterations, scale, xOffset, yOffset, shadingFactor);
 
-                    mandelbrot.saveImage(fileName + "_" + width + "_" + height + "_" + iterations + "_" + scale
-                            + "_" + xOffset + "_" + yOffset);
+                        mandelbrot.saveImage(saveFileName + "_" + width + "_" + height + "_" + iterations + "_" + scale
+                                + "_" + xOffset + "_" + yOffset + "_" + shadingFactor);
 
-                    plotButton.setEnabled(true);
-                    resetButton.setEnabled(true);
-                    saveButton.setEnabled(true);
-                }
-            };
-            Thread t = new Thread(r);
-            t.start();
+                        plotButton.setEnabled(true);
+                        resetButton.setEnabled(true);
+                        saveButton.setEnabled(true);
+                    }
+                });
 
+                t.start();
+
+
+            }
+
+        }
+        else
+        {
+            plotButton.setEnabled(true);
+            resetButton.setEnabled(true);
+            saveButton.setEnabled(true);
         }
     }
 
     // function to plot with the current user parameters
     public static void plotImage()
     {
-        Runnable r = new Runnable() {
+        Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
                 plotButton.setEnabled(false);
@@ -446,7 +472,7 @@ public class Mandelbrot extends JFrame {
 
 
                 viewerMandelbrot.plotImage(1921, 1081, iterations,
-                        scale * ((double)width / 1921.0), xOffset, yOffset);
+                        scale * ((double)width / 1921.0), xOffset, yOffset, shadingFactor);
 
                 backGroundImage = new BufferedImage(1921, 1081, BufferedImage.TYPE_INT_RGB) ;
                 Graphics g = backGroundImage.getGraphics();
@@ -459,10 +485,30 @@ public class Mandelbrot extends JFrame {
                 resetButton.setEnabled(true);
                 saveButton.setEnabled(true);
             }
-        };
-
-        Thread t = new Thread(r);
+        });
         t.start();
+
+    }
+
+    public static void main(String[] args) {
+
+        width = 3841;
+        height = 2161;
+        iterations = 1000;
+        scale = 0.001;
+        xOffset = 0;
+        yOffset = 0;
+        shadingFactor = 50.0;
+
+        new Mandelbrot();
+
+        // initialize full size plot
+        mandelbrot = new MandelbrotPlot(3841, 2161, bar);
+
+        // initialize viewer plot
+        viewerMandelbrot = new MandelbrotPlot(bar);
+
+        Mandelbrot.plotImage();
 
     }
 }

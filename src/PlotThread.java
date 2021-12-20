@@ -20,10 +20,11 @@ public class PlotThread implements Runnable {
     private final BufferedImage plot;
     private final int iterations;
     private final SyncCounter counter;
+    private final double shadingFactor;
 
     // constructor for thread that takes in calculation parameters
     public PlotThread(int iterations, int startRow, int stopRow, double zoomScale, double offsetX, double offsetY,
-                      int width, BufferedImage image, SyncCounter counter)
+                      int width, BufferedImage image, SyncCounter counter, double shadingFactor)
     {
         this.iterations = iterations;
         this.startRow = startRow;
@@ -34,6 +35,7 @@ public class PlotThread implements Runnable {
         this.offsetY = offsetY;
         this.plot = image;
         this.counter = counter;
+        this.shadingFactor = shadingFactor;
     }
 
     // this function runs when the thread is started, works to assign color values to plot based on equation result
@@ -74,9 +76,12 @@ public class PlotThread implements Runnable {
 
         Complex z = new Complex(0, 0);
         Complex c = new Complex(r, i);
+        double colorFactor;
+        double scale;
+        int colorVal;
 
         //iterates the equation for the input coordinate
-        for(int k = 0; k < iterations; k++)
+        for(int k = 1; k <= iterations; k++)
         {
             z = (z.sqr()).add(c);
 
@@ -86,28 +91,43 @@ public class PlotThread implements Runnable {
                 int green;
                 int blue;
 
-                //colorval based on value of 765
-                //divide 765 by max number of iterations to get multiplier
-                int colorVal = (int) ((765.0 / iterations) * k);
+                //colorval based on value of 768
+                //divide 768 by max number of iterations to get multiplier
+                colorFactor = ((768.0 / iterations) * k); // multiplied by current iteration k gives current color value out of max
+                scale = 1 - 1.0 / (Math.pow(shadingFactor * (colorFactor / 768), 10) + 1); // shading scale
 
+                colorVal = (int) colorFactor;
 
+                if(colorVal > 0)
+                {
+                    colorVal -= 1;
+                }
+
+                boolean color1, color2, color3;
+                color3 = color2 = color1 = false;
+
+                if(colorVal >= 768)
+                    System.out.println("high" + colorVal);
                 if(colorVal <= 255)
                 {
+                    color1 = true;
                     red = 255 - colorVal;
                     green = colorVal;
                     blue = 0;
                 }
-                else if(colorVal <= 510)
+                else if(colorVal <= 511)
                 {
+                    color2 = true;
+                    green = 255 - (colorVal - 256);
+                    blue = colorVal - 256;
                     red = 0;
-                    green = 255 - (colorVal - 255);
-                    blue = colorVal - 255;
                 }
-                else if(colorVal <= 765)
+                else if(colorVal <= 767)
                 {
+                    color3 = true;
                     red = 0 ;
                     green = 0;
-                    blue = 255 - (colorVal - 510);
+                    blue = 255 - (colorVal - 512);
                 }
                 else
                 {
@@ -116,7 +136,39 @@ public class PlotThread implements Runnable {
                     blue = 0;
                 }
 
-                return new Color(red, green, blue);
+                if((blue * scale) > 255 || (blue * scale) < 0)
+                {
+                    System.out.println();
+                    System.out.println(color1);
+                    System.out.println(color2);
+                    System.out.println(color3);
+                    System.out.println("BLUE: " + (blue * scale));
+                    System.out.println("ColorVal: " + colorVal);
+                }
+
+                if((green * scale) > 255 || (green * scale) < 0)
+                {
+                    System.out.println();
+                    System.out.println(color1);
+                    System.out.println(color2);
+                    System.out.println(color3);
+
+                    System.out.println("GREEN: " + (green * scale));
+                    System.out.println("ColorVal: " + colorVal);
+                }
+
+                if((red * scale) > 255 || (red * scale) < 0)
+                {
+                    System.out.println();
+                    System.out.println(color1);
+                    System.out.println(color2);
+                    System.out.println(color3);
+
+                    System.out.println("RED: " + (red * scale));
+                    System.out.println("ColorVal: " + colorVal);
+                }
+
+                return new Color((int) (red * scale), (int) (green * scale), (int) (blue * scale));
             }
         }
 

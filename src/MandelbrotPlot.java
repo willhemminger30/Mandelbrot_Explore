@@ -30,7 +30,7 @@ public class MandelbrotPlot {
     }
 
     // the meat of the program, uses multithreading to plot the Mandelbrot set
-    public void plotImage(int width, int height, int iterations, double zoomScale, double offsetX, double offsetY)
+    public void plotImage(int width, int height, int iterations, double zoomScale, double offsetX, double offsetY, double shadingFactor)
     {
         plot = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         SyncCounter counter = new SyncCounter(plot.getWidth() * plot.getHeight(), bar);
@@ -47,7 +47,7 @@ public class MandelbrotPlot {
         {
             plottingThreads[i] = new Thread(new PlotThread(iterations, (int)(((double) i / numCores) * plot.getHeight()),
                     (int)((((double)(i + 1)) / numCores) * plot.getHeight()) - 1, zoomScale, offsetX, offsetY,
-                    plot.getWidth(), plot, counter), "Thread " + (i + 1));
+                    plot.getWidth(), plot, counter, shadingFactor), "Thread " + (i + 1));
         }
 
         System.out.println("Starting Threads");
