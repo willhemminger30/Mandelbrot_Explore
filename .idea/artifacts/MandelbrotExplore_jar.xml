@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="MandelbrotWithGuiShading:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/MandelbrotWithGuiShading_jar</output-path>
+  <artifact type="jar" name="MandelbrotExplore:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/MandelbrotExplore_jar</output-path>
     <root id="archive" name="MandelbrotWithGuiShading.jar">
       <element id="module-output" name="MandelbrotWithGuiShading" />
     </root>

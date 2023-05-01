@@ -434,22 +434,20 @@ public class Mandelbrot extends JFrame {
             {
                 directory.mkdir();
             }
-            else {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mandelbrot.plotImage(iterations, scale, xOffset, yOffset, shadingFactor);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    mandelbrot.plotImage(iterations, scale, xOffset, yOffset, shadingFactor);
 
-                        mandelbrot.saveImage(saveFileName + "_" + width + "_" + height + "_" + iterations + "_" + scale
-                                + "_" + xOffset + "_" + yOffset + "_" + shadingFactor);
+                    mandelbrot.saveImage(saveFileName + "_" + width + "_" + height + "_" + iterations + "_" + scale
+                            + "_" + xOffset + "_" + yOffset + "_" + shadingFactor);
 
-                        resetButton.setEnabled(true);
-                        saveButton.setEnabled(true);
-                        mouseEnabled = true;
+                    resetButton.setEnabled(true);
+                    saveButton.setEnabled(true);
+                    mouseEnabled = true;
 
-                    }
-                }).start();
-            }
+                }
+            }).start();
 
         }
         else
