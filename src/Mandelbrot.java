@@ -14,6 +14,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 
 public class Mandelbrot extends JFrame {
+    private static boolean mouseEnabled;
     private static JPanel viewer;
     private static int width;
     private static int height;
@@ -66,6 +67,7 @@ public class Mandelbrot extends JFrame {
         setTitle("Mandelbrot Plot");
         setMinimumSize(new Dimension(1280, 720));
         setMaximumSize(new Dimension(1300,800));
+        mouseEnabled = true;
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
 
@@ -125,6 +127,8 @@ public class Mandelbrot extends JFrame {
                     {
                         saveButton.setEnabled(true);
                     }
+                    plotButton.setEnabled(true);
+                    viewerMandelbrot.setImageChanged(true);
                 }
                 catch(NumberFormatException ex)
                 {
@@ -186,55 +190,57 @@ public class Mandelbrot extends JFrame {
         viewer.addMouseListener(new MouseInputListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                if(mouseEnabled) {
+                    //drawing occurs in separate thread
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // when clicked, draw a circle over existing image and repaint
+                            plotButton.setEnabled(true);
+                            viewerMandelbrot.setImageChanged(true);
+                            int difference = 0;
 
-                //drawing occurs in separate thread
-                Thread newThread = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // when clicked, draw a circle over existing image and repaint
-                        int difference = 0;
+                            int xClick = e.getX();
+                            int yClick = e.getY();
 
-                        int xClick = e.getX();
-                        int yClick = e.getY();
+                            backGroundImage = new BufferedImage(1921, 1081, BufferedImage.TYPE_INT_RGB) ;
+                            Graphics g = backGroundImage.getGraphics();
 
-                        backGroundImage = new BufferedImage(1921, 1081, BufferedImage.TYPE_INT_RGB) ;
-                        Graphics g = backGroundImage.getGraphics();
+                            g.drawImage(viewerMandelbrot.getPlot(), 0, 0, null);
+                            repaint();
 
-                        g.drawImage(viewerMandelbrot.getPlot(), 0, 0, null);
-                        repaint();
+                            g.setColor(new Color(Color.GRAY.getRGB()));
 
-                        g.setColor(new Color(Color.GRAY.getRGB()));
+                            if(viewer.getWidth() <= viewer.getHeight() * (16.0 / 9))
+                            {
+                                difference = viewer.getHeight() - (int) (viewer.getWidth() * (9/16.0));
+                                g.drawOval((int) (xClick * (1921.0 / viewer.getWidth())) - 25, (int) ((yClick - (difference / 2.0)) * (1921.0 / viewer.getWidth())) - 25, 50, 50);
+                                g.drawOval((int) (xClick * (1921.0 / viewer.getWidth())) - 24, (int) ((yClick - (difference / 2.0)) * (1921.0 / viewer.getWidth())) - 24, 48, 48);
+                                g.drawOval((int) (xClick * (1921.0 / viewer.getWidth())) - 26, (int) ((yClick - (difference / 2.0)) * (1921.0 / viewer.getWidth())) - 26, 52, 52);
+                                tempX = xOffset + (xClick  - (viewer.getWidth() / 2.0)) * scale * (1921.0 / viewer.getWidth()) * ((double)width / 1921.0);
+                                tempY = yOffset - (yClick - (viewer.getHeight() / 2.0))  * scale * (1921.0 / viewer.getWidth()) * ((double)width / 1921.0);
+                            }
 
-                        if(viewer.getWidth() <= viewer.getHeight() * (16.0 / 9))
-                        {
-                            difference = viewer.getHeight() - (int) (viewer.getWidth() * (9/16.0));
-                            g.drawOval((int) (xClick * (1921.0 / viewer.getWidth())) - 25, (int) ((yClick - (difference / 2.0)) * (1921.0 / viewer.getWidth())) - 25, 50, 50);
-                            g.drawOval((int) (xClick * (1921.0 / viewer.getWidth())) - 24, (int) ((yClick - (difference / 2.0)) * (1921.0 / viewer.getWidth())) - 24, 48, 48);
-                            g.drawOval((int) (xClick * (1921.0 / viewer.getWidth())) - 26, (int) ((yClick - (difference / 2.0)) * (1921.0 / viewer.getWidth())) - 26, 52, 52);
-                            tempX = xOffset + (xClick  - (viewer.getWidth() / 2.0)) * scale * (1921.0 / viewer.getWidth()) * ((double)width / 1921.0);
-                            tempY = yOffset - (yClick - (viewer.getHeight() / 2.0))  * scale * (1921.0 / viewer.getWidth()) * ((double)width / 1921.0);
+                            else
+                            {
+                                difference = viewer.getWidth() - (int) (viewer.getHeight() * (16.0 / 9));
+                                g.drawOval((int) ((xClick - (difference / 2.0)) * (1081.0 / viewer.getHeight())) - 25, (int) ((yClick) * (1081.0 / viewer.getHeight())) - 25, 50, 50);
+                                g.drawOval((int) ((xClick - (difference / 2.0)) * (1081.0 / viewer.getHeight())) - 24, (int) ((yClick) * (1081.0 / viewer.getHeight())) - 24, 48, 48);
+                                g.drawOval((int) ((xClick - (difference / 2.0)) * (1081.0 / viewer.getHeight())) - 26, (int) ((yClick) * (1081.0 / viewer.getHeight())) - 26, 52, 52);
+                                tempX = xOffset + ((xClick - (viewer.getWidth() / 2.0))) * scale * (1081.0 / viewer.getHeight()) * ((double)height / 1081.0);
+                                tempY = yOffset - (yClick  - (viewer.getHeight() / 2.0)) * scale * (1081.0 / viewer.getHeight()) * ((double)height / 1081.0);
+                            }
+
+                            repaint();
+
+
+                            xOffsetField.setText(Double.toString(tempX));
+                            yOffsetField.setText(Double.toString(tempY));
+
+                            saveButton.setEnabled(false);
                         }
-
-                        else
-                        {
-                            difference = viewer.getWidth() - (int) (viewer.getHeight() * (16.0 / 9));
-                            g.drawOval((int) ((xClick - (difference / 2.0)) * (1081.0 / viewer.getHeight())) - 25, (int) ((yClick) * (1081.0 / viewer.getHeight())) - 25, 50, 50);
-                            g.drawOval((int) ((xClick - (difference / 2.0)) * (1081.0 / viewer.getHeight())) - 24, (int) ((yClick) * (1081.0 / viewer.getHeight())) - 24, 48, 48);
-                            g.drawOval((int) ((xClick - (difference / 2.0)) * (1081.0 / viewer.getHeight())) - 26, (int) ((yClick) * (1081.0 / viewer.getHeight())) - 26, 52, 52);
-                            tempX = xOffset + ((xClick - (viewer.getWidth() / 2.0))) * scale * (1081.0 / viewer.getHeight()) * ((double)height / 1081.0);
-                            tempY = yOffset - (yClick  - (viewer.getHeight() / 2.0)) * scale * (1081.0 / viewer.getHeight()) * ((double)height / 1081.0);
-                        }
-
-                        repaint();
-
-
-                        xOffsetField.setText(Double.toString(tempX));
-                        yOffsetField.setText(Double.toString(tempY));
-
-                        saveButton.setEnabled(false);
-                    }
-                });
-                newThread.start();
+                    }).start();
+                }
             }
 
             @Override
@@ -320,7 +326,8 @@ public class Mandelbrot extends JFrame {
                     mandelbrot.setPlot(new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB));
                 }
 
-
+                viewerMandelbrot.setImageChanged(false);
+                viewerMandelbrot.setShadingChanged(false);
                 plotImage();
             }
         });
@@ -392,6 +399,8 @@ public class Mandelbrot extends JFrame {
         JSlider source = (JSlider) evt.getSource();
         shadingFactor = source.getValue() / 10.0;
         shadingField.setText(Double.toString(shadingFactor));
+        plotButton.setEnabled(true);
+        this.viewerMandelbrot.setShadingChanged(true);
     }
 
     // function to save the user's current plot with a chosen filename
@@ -399,6 +408,7 @@ public class Mandelbrot extends JFrame {
         plotButton.setEnabled(false);
         resetButton.setEnabled(false);
         saveButton.setEnabled(false);
+        mouseEnabled = false;
 
         width = Integer.parseInt(widthField.getText());
         height = Integer.parseInt(heightField.getText());
@@ -425,23 +435,20 @@ public class Mandelbrot extends JFrame {
                 directory.mkdir();
             }
             else {
-                Thread t = new Thread(new Runnable() {
+                new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        mandelbrot.plotImage(width, height, iterations, scale, xOffset, yOffset, shadingFactor);
+                        mandelbrot.plotImage(iterations, scale, xOffset, yOffset, shadingFactor);
 
                         mandelbrot.saveImage(saveFileName + "_" + width + "_" + height + "_" + iterations + "_" + scale
                                 + "_" + xOffset + "_" + yOffset + "_" + shadingFactor);
 
-                        plotButton.setEnabled(true);
                         resetButton.setEnabled(true);
                         saveButton.setEnabled(true);
+                        mouseEnabled = true;
+
                     }
-                });
-
-                t.start();
-
-
+                }).start();
             }
 
         }
@@ -450,15 +457,17 @@ public class Mandelbrot extends JFrame {
             plotButton.setEnabled(true);
             resetButton.setEnabled(true);
             saveButton.setEnabled(true);
+            mouseEnabled = true;
         }
     }
 
     // function to plot with the current user parameters
     public static void plotImage()
     {
-        Thread t = new Thread(new Runnable() {
+        new Thread(new Runnable() {
             @Override
             public void run() {
+                mouseEnabled = false;
                 plotButton.setEnabled(false);
                 resetButton.setEnabled(false);
                 saveButton.setEnabled(false);
@@ -466,12 +475,12 @@ public class Mandelbrot extends JFrame {
                 yOffset = Double.parseDouble(yOffsetField.getText());
                 scale = Double.parseDouble(scaleField.getText());
                 iterations = Integer.parseInt(iterationField.getText());
-//
+
 //                System.out.println(tempX);
 //                System.out.println(tempY);
 
 
-                viewerMandelbrot.plotImage(1921, 1081, iterations,
+                viewerMandelbrot.plotImage(iterations,
                         scale * ((double)width / 1921.0), xOffset, yOffset, shadingFactor);
 
                 backGroundImage = new BufferedImage(1921, 1081, BufferedImage.TYPE_INT_RGB) ;
@@ -481,12 +490,14 @@ public class Mandelbrot extends JFrame {
 
                 viewer.repaint();
 
-                plotButton.setEnabled(true);
                 resetButton.setEnabled(true);
                 saveButton.setEnabled(true);
+                viewerMandelbrot.setImageChanged(false);
+                viewerMandelbrot.setShadingChanged(false);
+                mouseEnabled = true;
             }
-        });
-        t.start();
+        }).start();
+
 
     }
 
@@ -506,9 +517,8 @@ public class Mandelbrot extends JFrame {
         mandelbrot = new MandelbrotPlot(3841, 2161, bar);
 
         // initialize viewer plot
-        viewerMandelbrot = new MandelbrotPlot(bar);
+        viewerMandelbrot = new MandelbrotPlot(1921, 1081, bar);
 
         Mandelbrot.plotImage();
-
     }
 }

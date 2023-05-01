@@ -14,25 +14,50 @@ public class MandelbrotPlot {
 
     private BufferedImage plot; // the image of the current Mandelbrot plot
     private JProgressBar bar;
+    private boolean shadingChanged;
+    private boolean imageChanged;
 
-    // constructor that takes in progress bar object
-    public MandelbrotPlot(JProgressBar bar)
-    {
-        this.plot = null;
-        this.bar = bar;
-    }
+    private int [][] iterationPerPixel;
+    private int [][] rgbPerPixel;
 
     // constructor for initial width & height parameters
     public MandelbrotPlot(int width, int height, JProgressBar bar)
     {
         plot = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         this.bar = bar;
+        this.shadingChanged = false;
+        this.imageChanged = false;
+        this.iterationPerPixel = new int[plot.getWidth()][plot.getHeight()];
+        this.rgbPerPixel = new int[plot.getWidth()][plot.getHeight()];
+    }
+
+    public void setShadingChanged(boolean shadingChanged) {
+        this.shadingChanged = shadingChanged;
+    }
+
+    public void setImageChanged(boolean imageChanged) {
+        this.imageChanged = imageChanged;
+    }
+
+    public boolean getShadingChanged() {
+        return this.shadingChanged;
+    }
+
+    public boolean getImageChanged() {
+        return this.imageChanged;
+    }
+
+    public int[][] getIterationPerPixel() {
+        return iterationPerPixel;
+    }
+
+    public int[][] getRgbPerPixel() {
+        return rgbPerPixel;
     }
 
     // the meat of the program, uses multithreading to plot the Mandelbrot set
-    public void plotImage(int width, int height, int iterations, double zoomScale, double offsetX, double offsetY, double shadingFactor)
+    public void plotImage(int iterations, double zoomScale, double offsetX, double offsetY, double shadingFactor)
     {
-        plot = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         SyncCounter counter = new SyncCounter(plot.getWidth() * plot.getHeight(), bar);
         int numCores = Runtime.getRuntime().availableProcessors();
         Thread [] plottingThreads = new Thread[numCores];
@@ -47,7 +72,7 @@ public class MandelbrotPlot {
         {
             plottingThreads[i] = new Thread(new PlotThread(iterations, (int)(((double) i / numCores) * plot.getHeight()),
                     (int)((((double)(i + 1)) / numCores) * plot.getHeight()) - 1, zoomScale, offsetX, offsetY,
-                    plot.getWidth(), plot, counter, shadingFactor), "Thread " + (i + 1));
+                    plot.getWidth(), this, counter, shadingFactor), "Thread " + (i + 1));
         }
 
         System.out.println("Starting Threads");
@@ -62,7 +87,6 @@ public class MandelbrotPlot {
             {
                 Thread current = plottingThreads[i];
                 current.join();
-                //System.out.println(current.getName() + " finished.");
             }
         }
         catch(InterruptedException e)

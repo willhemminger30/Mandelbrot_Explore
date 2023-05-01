@@ -17,14 +17,15 @@ public class PlotThread implements Runnable {
     private final double zoomScale;
     private final double offsetX;
     private final double offsetY;
-    private final BufferedImage plot;
+    private MandelbrotPlot plot;
+    private BufferedImage image;
     private final int iterations;
     private final SyncCounter counter;
     private final double shadingFactor;
 
     // constructor for thread that takes in calculation parameters
     public PlotThread(int iterations, int startRow, int stopRow, double zoomScale, double offsetX, double offsetY,
-                      int width, BufferedImage image, SyncCounter counter, double shadingFactor)
+                      int width, MandelbrotPlot plot, SyncCounter counter, double shadingFactor)
     {
         this.iterations = iterations;
         this.startRow = startRow;
@@ -33,9 +34,10 @@ public class PlotThread implements Runnable {
         this.zoomScale = zoomScale;
         this.offsetX = offsetX;
         this.offsetY = offsetY;
-        this.plot = image;
+        this.plot = plot;
         this.counter = counter;
         this.shadingFactor = shadingFactor;
+        this.image = this.plot.getPlot();
     }
 
     // this function runs when the thread is started, works to assign color values to plot based on equation result
@@ -48,12 +50,12 @@ public class PlotThread implements Runnable {
             for(int j = startRow; j <= stopRow; j++)
             {
                 try{
-                    plot.setRGB(i, j, iterate(iterations, i, j, zoomScale, offsetX, offsetY).getRGB());
+                    plot.getPlot().setRGB(i, j, iterate(iterations, i, j, zoomScale, offsetX, offsetY).getRGB());
                     counter.increment();
                 }catch(Exception e)
                 {
                     System.out.println(e.getMessage());
-                    System.out.println(plot.getHeight() + " " +  plot.getWidth());
+                    System.out.println(image.getHeight() + " " +  image.getWidth());
                     System.out.println("i: " + i + " j: " + j);
                     exit(0);
                 }
@@ -65,9 +67,18 @@ public class PlotThread implements Runnable {
     // iterate returns a color to run()
     public Color iterate(int iterations, int x, int y, double zoomScale, double offsetX, double offsetY)
     {
+        double scale;
+        double colorFactor;
+        if(plot.getShadingChanged() && !plot.getImageChanged()) {
+            colorFactor = ((768.0 / iterations) * plot.getIterationPerPixel()[x][y]); // multiplied by current iteration k gives current color value out of max
+            scale = (1 - 1.0 / (Math.pow(shadingFactor * (colorFactor / 768), 10) + 1)); // shading scale
+            Color pixelColor = new Color(plot.getRgbPerPixel()[x][y]);
+            return new Color((int)(pixelColor.getRed() * scale), (int)(pixelColor.getGreen()
+                    * scale), (int)(pixelColor.getBlue() * scale));
+        }
 
-        double r = (x - ((int)((plot.getWidth()) / 2))) * zoomScale;
-        double i = (((int)((plot.getHeight()) / 2)) - y) * zoomScale;
+        double r = (x - ((int)((image.getWidth()) / 2))) * zoomScale;
+        double i = (((int)((image.getHeight()) / 2)) - y) * zoomScale;
 
         //offset
         r += offsetX;
@@ -76,8 +87,6 @@ public class PlotThread implements Runnable {
 
         Complex z = new Complex(0, 0);
         Complex c = new Complex(r, i);
-        double colorFactor;
-        double scale;
         int colorVal;
 
         //iterates the equation for the input coordinate
@@ -168,10 +177,15 @@ public class PlotThread implements Runnable {
                     System.out.println("ColorVal: " + colorVal);
                 }
 
-                return new Color((int) (red * scale), (int) (green * scale), (int) (blue * scale));
+                Color color = new Color((int) (red * scale), (int) (green * scale), (int) (blue * scale));
+                plot.getIterationPerPixel()[x][y] = k;
+                plot.getRgbPerPixel()[x][y] = new Color(red, green, blue).getRGB();
+                return color;
             }
         }
 
+        plot.getIterationPerPixel()[x][y] = iterations;
+        plot.getRgbPerPixel()[x][y] = Color.BLACK.getRGB();
         return Color.BLACK;
     }
 }
