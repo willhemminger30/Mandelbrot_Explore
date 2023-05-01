@@ -55,6 +55,7 @@ primitive.  Currently, the system does not prohibit the user from doing this.
   
   12/20/21:
   - Added shading capabilities
+  
   5/01/23:
   - Optimized the way shading is performed on the image
   - Resolved UI bugs
