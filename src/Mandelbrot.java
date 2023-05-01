@@ -122,13 +122,16 @@ public class Mandelbrot extends JFrame {
                             != yOffset)
                     {
                         saveButton.setEnabled(false);
+                        viewerMandelbrot.setImageChanged(true);
+                        mandelbrot.setImageChanged(true);
                     }
-                    else // otherwise make sure that save is enabled
+                    else if(!(e.getSource() instanceof JTextField)) // otherwise make sure that save is enabled
                     {
                         saveButton.setEnabled(true);
+                        viewerMandelbrot.setImageChanged(false);
+                        mandelbrot.setImageChanged(false);
                     }
                     plotButton.setEnabled(true);
-                    viewerMandelbrot.setImageChanged(true);
                 }
                 catch(NumberFormatException ex)
                 {
@@ -198,6 +201,8 @@ public class Mandelbrot extends JFrame {
                             // when clicked, draw a circle over existing image and repaint
                             plotButton.setEnabled(true);
                             viewerMandelbrot.setImageChanged(true);
+                            mandelbrot.setImageChanged(true);
+
                             int difference = 0;
 
                             int xClick = e.getX();
@@ -283,7 +288,7 @@ public class Mandelbrot extends JFrame {
                 width = Integer.parseInt(widthField.getText());
                 height = Integer.parseInt(heightField.getText());
 
-                if((width != mandelbrot.getPlot().getWidth()) || (width != mandelbrot.getPlot().getHeight()))
+                if((width != mandelbrot.getPlot().getWidth()) || (height != mandelbrot.getPlot().getHeight()))
                 {
                     mandelbrot.setPlot(new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB));
                 }
@@ -325,9 +330,8 @@ public class Mandelbrot extends JFrame {
                 {
                     mandelbrot.setPlot(new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB));
                 }
-
-                viewerMandelbrot.setImageChanged(false);
-                viewerMandelbrot.setShadingChanged(false);
+                viewerMandelbrot.setImageChanged(true);
+                mandelbrot.setImageChanged(true);
                 plotImage();
             }
         });
@@ -400,7 +404,7 @@ public class Mandelbrot extends JFrame {
         shadingFactor = source.getValue() / 10.0;
         shadingField.setText(Double.toString(shadingFactor));
         plotButton.setEnabled(true);
-        this.viewerMandelbrot.setShadingChanged(true);
+        saveButton.setEnabled(false);
     }
 
     // function to save the user's current plot with a chosen filename
@@ -409,6 +413,7 @@ public class Mandelbrot extends JFrame {
         resetButton.setEnabled(false);
         saveButton.setEnabled(false);
         mouseEnabled = false;
+        shadingSlider.setEnabled(false);
 
         width = Integer.parseInt(widthField.getText());
         height = Integer.parseInt(heightField.getText());
@@ -425,7 +430,7 @@ public class Mandelbrot extends JFrame {
 
         String fileName = JOptionPane.showInputDialog(null, "Name of saved image:");
 
-        if(fileName != null)
+        if(fileName != null && !fileName.equals(""))
         {
             String saveFileName = "Images/" + fileName;
             File directory = new File("Images/");
@@ -445,7 +450,7 @@ public class Mandelbrot extends JFrame {
                     resetButton.setEnabled(true);
                     saveButton.setEnabled(true);
                     mouseEnabled = true;
-
+                    shadingSlider.setEnabled(true);
                 }
             }).start();
 
@@ -456,6 +461,7 @@ public class Mandelbrot extends JFrame {
             resetButton.setEnabled(true);
             saveButton.setEnabled(true);
             mouseEnabled = true;
+            shadingSlider.setEnabled(true);
         }
     }
 
@@ -466,6 +472,7 @@ public class Mandelbrot extends JFrame {
             @Override
             public void run() {
                 mouseEnabled = false;
+                shadingSlider.setEnabled(false);
                 plotButton.setEnabled(false);
                 resetButton.setEnabled(false);
                 saveButton.setEnabled(false);
@@ -490,9 +497,8 @@ public class Mandelbrot extends JFrame {
 
                 resetButton.setEnabled(true);
                 saveButton.setEnabled(true);
-                viewerMandelbrot.setImageChanged(false);
-                viewerMandelbrot.setShadingChanged(false);
                 mouseEnabled = true;
+                shadingSlider.setEnabled(true);
             }
         }).start();
 

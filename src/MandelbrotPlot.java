@@ -14,7 +14,6 @@ public class MandelbrotPlot {
 
     private BufferedImage plot; // the image of the current Mandelbrot plot
     private JProgressBar bar;
-    private boolean shadingChanged;
     private boolean imageChanged;
 
     private int [][] iterationPerPixel;
@@ -25,22 +24,13 @@ public class MandelbrotPlot {
     {
         plot = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         this.bar = bar;
-        this.shadingChanged = false;
-        this.imageChanged = false;
+        this.imageChanged = true;
         this.iterationPerPixel = new int[plot.getWidth()][plot.getHeight()];
         this.rgbPerPixel = new int[plot.getWidth()][plot.getHeight()];
     }
 
-    public void setShadingChanged(boolean shadingChanged) {
-        this.shadingChanged = shadingChanged;
-    }
-
     public void setImageChanged(boolean imageChanged) {
         this.imageChanged = imageChanged;
-    }
-
-    public boolean getShadingChanged() {
-        return this.shadingChanged;
     }
 
     public boolean getImageChanged() {
@@ -100,6 +90,7 @@ public class MandelbrotPlot {
         long duration = endTime - startTime;
 
         System.out.println("Time to plot: " + (duration / 1000) + " seconds.");
+        this.setImageChanged(false);
     }
 
 
@@ -125,6 +116,8 @@ public class MandelbrotPlot {
     public void setPlot(BufferedImage newPlot)
     {
         this.plot = newPlot;
+        this.iterationPerPixel = new int[plot.getWidth()][plot.getHeight()];
+        this.rgbPerPixel = new int[plot.getWidth()][plot.getHeight()];
     }
 }
 

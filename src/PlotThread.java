@@ -69,8 +69,8 @@ public class PlotThread implements Runnable {
     {
         double scale;
         double colorFactor;
-        if(plot.getShadingChanged() && !plot.getImageChanged()) {
-            colorFactor = ((768.0 / iterations) * plot.getIterationPerPixel()[x][y]); // multiplied by current iteration k gives current color value out of max
+        if(!plot.getImageChanged()) {
+            colorFactor = ((768.0 / iterations) * plot.getIterationPerPixel()[x][y]); // multiplied by stored iteration
             scale = (1 - 1.0 / (Math.pow(shadingFactor * (colorFactor / 768), 10) + 1)); // shading scale
             Color pixelColor = new Color(plot.getRgbPerPixel()[x][y]);
             return new Color((int)(pixelColor.getRed() * scale), (int)(pixelColor.getGreen()
