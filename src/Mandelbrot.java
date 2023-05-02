@@ -116,21 +116,14 @@ public class Mandelbrot extends JFrame {
                 try
                 {
                     // if GUI fields do not match actual values, disable the save button
-                    if(Integer.parseInt(widthField.getText()) != width || Integer.parseInt(heightField.getText()) != height
-                            || Integer.parseInt(iterationField.getText()) != iterations || Double.parseDouble(scaleField.getText()) != scale
-                            || Double.parseDouble(xOffsetField.getText()) != xOffset || Double.parseDouble(yOffsetField.getText())
-                            != yOffset)
+                    if(parametersChangedGUI())
                     {
                         saveButton.setEnabled(false);
                         plotButton.setEnabled(true);
-                        viewerMandelbrot.setImageChanged(true);
-                        mandelbrot.setImageChanged(true);
                     }
                     else if(!(((JTextField) e.getSource()).getParent() instanceof JOptionPane)) // otherwise if the typing did not change the parameters make sure that save is enabled
                     {
                         saveButton.setEnabled(true);
-                        viewerMandelbrot.setImageChanged(false);
-                        mandelbrot.setImageChanged(false);
                         plotButton.setEnabled(true);
                     }
 
@@ -202,8 +195,6 @@ public class Mandelbrot extends JFrame {
                         public void run() {
                             // when clicked, draw a circle over existing image and repaint
                             plotButton.setEnabled(true);
-                            viewerMandelbrot.setImageChanged(true);
-                            mandelbrot.setImageChanged(true);
 
                             int difference = 0;
 
@@ -287,12 +278,12 @@ public class Mandelbrot extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //System.out.println("Plot");
-                width = Integer.parseInt(widthField.getText());
-                height = Integer.parseInt(heightField.getText());
+                int tempWidth = Integer.parseInt(widthField.getText());
+                int tempHeight = Integer.parseInt(heightField.getText());
 
-                if((width != mandelbrot.getPlot().getWidth()) || (height != mandelbrot.getPlot().getHeight()))
+                if((tempWidth != mandelbrot.getPlot().getWidth()) || (tempHeight != mandelbrot.getPlot().getHeight()))
                 {
-                    mandelbrot.setPlot(new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB));
+                    mandelbrot.setPlot(new BufferedImage(tempWidth, tempHeight, BufferedImage.TYPE_INT_RGB));
                 }
 
                 plotImage();
@@ -323,8 +314,8 @@ public class Mandelbrot extends JFrame {
                 tempY = 0;
                 shadingField.setText("50.0");
 
-                width = Integer.parseInt(widthField.getText());
-                height = Integer.parseInt(heightField.getText());
+//                width = Integer.parseInt(widthField.getText());
+//                height = Integer.parseInt(heightField.getText());
                 shadingSlider.setValue(500);
                 shadingFactor = 50;
 
@@ -332,8 +323,8 @@ public class Mandelbrot extends JFrame {
                 {
                     mandelbrot.setPlot(new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB));
                 }
-                viewerMandelbrot.setImageChanged(true);
-                mandelbrot.setImageChanged(true);
+
+                mandelbrot.setIterations(-1);
                 plotImage();
             }
         });
@@ -416,7 +407,8 @@ public class Mandelbrot extends JFrame {
         saveButton.setEnabled(false);
         mouseEnabled = false;
         shadingSlider.setEnabled(false);
-
+        viewerMandelbrot.setImageChanged(parametersChangedGUI());
+        mandelbrot.setImageChanged(parametersChangedPlot(mandelbrot));
         width = Integer.parseInt(widthField.getText());
         height = Integer.parseInt(heightField.getText());
 
@@ -478,6 +470,10 @@ public class Mandelbrot extends JFrame {
                 plotButton.setEnabled(false);
                 resetButton.setEnabled(false);
                 saveButton.setEnabled(false);
+                viewerMandelbrot.setImageChanged(parametersChangedGUI());
+                mandelbrot.setImageChanged(parametersChangedPlot(mandelbrot));
+                width = Integer.parseInt(widthField.getText());
+                height = Integer.parseInt(heightField.getText());
                 xOffset = Double.parseDouble(xOffsetField.getText());
                 yOffset = Double.parseDouble(yOffsetField.getText());
                 scale = Double.parseDouble(scaleField.getText());
@@ -503,18 +499,30 @@ public class Mandelbrot extends JFrame {
                 shadingSlider.setEnabled(true);
             }
         }).start();
+    }
 
+    private static boolean parametersChangedGUI() {
+        return Integer.parseInt(widthField.getText()) != width || Integer.parseInt(heightField.getText()) != height
+                || Integer.parseInt(iterationField.getText()) != iterations || Double.parseDouble(scaleField.getText()) != scale
+                || Double.parseDouble(xOffsetField.getText()) != xOffset || Double.parseDouble(yOffsetField.getText())
+                != yOffset;
+    }
 
+    private static boolean parametersChangedPlot(MandelbrotPlot plot) {
+        return Integer.parseInt(widthField.getText()) != plot.getPlot().getWidth() || Integer.parseInt(heightField.getText()) != plot.getPlot().getHeight()
+                || Integer.parseInt(iterationField.getText()) != plot.getIterations() || Double.parseDouble(scaleField.getText()) != plot.getZoomScale()
+                || Double.parseDouble(xOffsetField.getText()) != plot.getOffsetX() || Double.parseDouble(yOffsetField.getText())
+                != plot.getOffsetY();
     }
 
     public static void main(String[] args) {
 
-        width = 3841;
-        height = 2161;
-        iterations = 1000;
-        scale = 0.001;
-        xOffset = 0;
-        yOffset = 0;
+//        width = 3841;
+//        height = 2161;
+//        iterations = 1000;
+//        scale = 0.001;
+//        xOffset = 0;
+//        yOffset = 0;
         shadingFactor = 50.0;
 
         new Mandelbrot();

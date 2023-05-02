@@ -18,6 +18,10 @@ public class MandelbrotPlot {
 
     private int [][] iterationPerPixel;
     private int [][] rgbPerPixel;
+    private int iterations;
+    private double zoomScale;
+    private double offsetX;
+    private double offsetY;
 
     // constructor for initial width & height parameters
     public MandelbrotPlot(int width, int height, JProgressBar bar)
@@ -32,6 +36,9 @@ public class MandelbrotPlot {
     public void setImageChanged(boolean imageChanged) {
         this.imageChanged = imageChanged;
     }
+    public void setIterations(int i) {
+        this.iterations = i;
+    }
 
     public boolean getImageChanged() {
         return this.imageChanged;
@@ -45,9 +52,29 @@ public class MandelbrotPlot {
         return rgbPerPixel;
     }
 
+    public int getIterations() {
+        return iterations;
+    }
+
+    public double getZoomScale() {
+        return zoomScale;
+    }
+
+    public double getOffsetX() {
+        return offsetX;
+    }
+
+    public double getOffsetY() {
+        return offsetY;
+    }
+
     // the meat of the program, uses multithreading to plot the Mandelbrot set
     public void plotImage(int iterations, double zoomScale, double offsetX, double offsetY, double shadingFactor)
     {
+        this.iterations = iterations;
+        this.zoomScale = zoomScale;
+        this.offsetX = offsetX;
+        this.offsetY = offsetY;
         SyncCounter counter = new SyncCounter(plot.getWidth() * plot.getHeight(), bar);
         int numCores = Runtime.getRuntime().availableProcessors();
         Thread [] plottingThreads = new Thread[numCores];
