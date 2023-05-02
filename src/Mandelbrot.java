@@ -124,11 +124,13 @@ public class Mandelbrot extends JFrame {
                         saveButton.setEnabled(false);
                         plotButton.setEnabled(true);
                         viewerMandelbrot.setImageChanged(true);
+                        mandelbrot.setImageChanged(true);
                     }
                     else if(!(((JTextField) e.getSource()).getParent() instanceof JOptionPane)) // otherwise if the typing did not change the parameters make sure that save is enabled
                     {
                         saveButton.setEnabled(true);
                         viewerMandelbrot.setImageChanged(false);
+                        mandelbrot.setImageChanged(false);
                         plotButton.setEnabled(true);
                     }
 
